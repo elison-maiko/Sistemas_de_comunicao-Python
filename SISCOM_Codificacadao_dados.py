@@ -11,11 +11,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #leitura
-dados = ""
-while (len(dados) != 3):
-    dados = input("Insira 4 caracteres:")
+leitura = "d"
+while (len(leitura) != 4):
+    leitura = input("Insira 4 caracteres:")
 
+#ASCII
+dados = []
+for i in leitura:
+    bin = format(ord(i), '08b')  
+    print(f"Char: {i} --> {ord(i)} --> {bin}")  
+    dados.append(bin)
+dados = ''.join(dados) #usar como int()?
 print(dados)
+
+#tratamento de dados:
 
 
 
