@@ -30,7 +30,6 @@ def conv_ASCII(sinal):
 # Tratamento de dados:
 # Tratar como string, pra facilitar os indices do 
 #---------------------------------------------------------------------
-ex_prof = '11001100'
 def cod_2BQ1 (sinal):
     mapping =  {
         '00': 1,
@@ -50,29 +49,56 @@ def cod_2BQ1 (sinal):
             nivel_anterior = -dupla
     return cod
 
-#print (cod_2BQ1(ex_prof))
 #------------------------------------------------------------------------
+
+valores = np.load('valores_8B6T.npy')
+
+def indices_hexa():
+    mapeamento = [['00', [0, 0, 0, 0, 0, 0]] for _ in range(256)]  # cria uma matriz do tipo [HEXADECIMAL, Sequencia de Valores de Tensão ]
+
+    #preencher a 1 coluna do mapeamento como sendo os valores em hexadecimal
+    for i in range(0, 255):                     #Nao vai até 255 pois o arquivo importado n tem o tamanho certo
+        aux = format(i, '02X')
+        mapeamento[i][0] = aux                  #Adiciona o hexadeximal 
+        mapeamento[i][1] = valores[i].tolist()  #Adiciona os niveis de tensão correspondentes
+                                                #Se retirar .tolist apresenta insconsistencia de formato
+    
+    #Correções de erros na lista importada: (adicionar a medida que descobrir)
+    mapeamento[255][0] = 'FF'
+    mapeamento[255][1] = [0,0,1,-1,0,1]
+
+#   Print para verificação da matriz de mapeamento
+#   for j in range (0, len(valores)+1):
+#       print(mapeamento[j][0],mapeamento[j][1], end= '\n')
+
+    return mapeamento
+
+
+map_8B6T = indices_hexa()
+#Definida a matriz de conversao, partimos para o tratamento do sinal recebido
+
 def cod_8B6T(sinal):
     #Receber string com os bits
     #Separar de 8 em 8 bits
     #Converter de string pra binário para:
     #Converter de Binário pra HEXA (6bits)
-    #Converter de HEXA p string para tratar os dados
+    #Usar matriz de mapeamento
     #Relacionar mapping com hexa
 
-    #Mapeando segundo a Tabela FORUZAN APENDICE D
-    mapping = {
-        '00': [-1,1,0,0,-1,1], '01': [0,-1,1,-1,1,0], '02': [0,-1,1,0,-1,1], '03': [0,-1,1,1,0 ,-1], '04': [-1,1,0,1,0,-1], '05': [1,0,-1,-1,1,0]
-    }
 
     for i in range (0, len(sinal), 8):
         strinig_bin = sinal[i:i+8]              #Separa de 8 em 8            
         bin = int(strinig_bin,2)                #Converete p BIN
         hexa = format(bin, 'X')                 #Converte p HEXA
-              
+    
+    i = 0 #Sim, quero reutilizar o i
+    for i in range(0, 256):                     #Varre o mapeamento até econtrar o HEXA
+        if hexa == map_8B6T[i][0]:              #Se encontar
+            return map_8B6T[i][1]               #Retorna a lista de valores de tensão
+    print("Não econtrado!!!")
+    return [0,0,0,0,0,0]                        #Retorna sinais nulos de tensão pra indicar erro
 
-    return bin, hexa
-
+ex_prof = '01010011'
 print(cod_8B6T(ex_prof))
 
 
