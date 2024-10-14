@@ -10,23 +10,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-#leitura
-leitura = "dddd"
-while (len(leitura) != 4):
-    leitura = input("Insira 4 caracteres:")
-
-#ASCII
-def conv_ASCII(sinal):
-    dados = []
-    for i in sinal:
-        bin = format(ord(i), '08b')  
-        print(f"Char: {i} --> {ord(i)} --> {bin}")  
-        dados.append(bin)
-    dados = ''.join(dados) #usar como int()?
-    return dados
-
-#print (dados, end = "\n\n")
-
 # Tratamento de dados:
 # Tratar como string, pra facilitar os indices do 
 #---------------------------------------------------------------------
@@ -232,13 +215,81 @@ def plot_4DPAM5(sinal, fio1,fio2,fio3,fio4):
 
     plt.tight_layout()  # Ajusta o layout
       
+#----------------------------------------------------------------------
 
+def transicao_nivel(atual, prox, lastlevel):
+    # ---------- logica p o zero ----------------
+    if (atual == 0) and (prox == 1):
+        if lastlevel == 1: return -1
+        else: return 1
+    elif (atual == 0) and (prox == 0): return 0 
+    # ---------- logica p 1 ---------------------
+    elif (atual == 1):
+        if (prox == 0): return 1 * lastlevel
+        else: return 0
+
+            
+    return 
+
+def cod_MLT3(sinal):
+    # 3 níveis: 1V, 0, -1V
+    # Tem 3 regras para transição de nível
+
+    sinais_tensao = []                                                           #Inicia o sinal
+    lastnivel = -1                                                               #Definicao do nivel anterior inicial, segundo o autor
+    sinais_tensao.append(int(sinal[0]))                                          #Iteração inicial
+    for i in range(1,len(sinal)):
+        sin = transicao_nivel(abs(sinais_tensao[i-1]), int(sinal[i]), lastnivel)
+        sinais_tensao.append(sin)
+        if sin != 0: 
+            lastnivel = sin                                                      # Atualiza o último nível para o próximo ciclo
+    return sinais_tensao
     
+def plot_MLT3(sinal):
+    # Definindo o eixo do tempo
+    tempo = np.arange(len(sinal))  # Eixo do tempo
+    plt.figure(figsize=(10, 6))
+    plt.step(tempo, sinal, where='post', color='magenta')  # Gráfico em escada
+    plt.title('Codificação MLT3')
+    plt.xlabel('Tempo')
+    plt.ylabel('Tensão')
+    plt.ylim(-2, 2)         # Define os limites do eixo y
+    plt.yticks([-1, 0, 1])  # Define os ticks do eixo y
+    plt.xticks([])          # Remove os índices do eixo X
+    plt.axhline(0, color='black', linewidth=0.5, linestyle='--')  # Linha no eixo x
+
+    # Traçar linhas verticais a cada 6 valores de x
+    for x in range(0, len(sinal), 1):
+        plt.axvline(x=x, color='gray', linestyle='--', linewidth=0.5)  # Linha vertical
+
+    # Garantir que o eixo X vai até o final
+    plt.xlim(0, len(sinal))  # Para alinhar à borda direita
 # ---------------------------------------------------------------------
-ex_prof = '000100010101001101010000'
-plot_2BQ1(cod_2BQ1(ex_prof))
-plot_8b6T(cod_8B6T(ex_prof))
-result, f1,f2,f3,f4 = cod_4DPAM5(ex_prof)
+
+#leitura
+leitura = ""
+while (len(leitura) != 4):
+    leitura = input("Insira 4 caracteres:")
+
+#ASCII
+def conv_ASCII(sinal):
+    dados = []
+    for i in sinal:
+        bin = format(ord(i), '08b')  
+        print(f"Char: {i} --> {ord(i)} --> {bin}")  
+        dados.append(bin)
+    dados = ''.join(dados) #usar como int()?
+    return dados
+
+signal = conv_ASCII(leitura)
+print(signal, end = "\n\n")
+
+#ex_prof = '000100010101001101010000'
+plot_2BQ1(cod_2BQ1(signal))
+plot_8b6T(cod_8B6T(signal))
+result, f1,f2,f3,f4 = cod_4DPAM5(signal)
 plot_4DPAM5(result,f1,f2,f3,f4)
+#ex_prof2 = '01011011'
+plot_MLT3(cod_MLT3(signal))
 plt.show()
 
