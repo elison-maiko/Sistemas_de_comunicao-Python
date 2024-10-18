@@ -1,3 +1,4 @@
+# Autor: Elison Maiko Oliveira
 # Codigo criado para simular a codificação de sinais de informação por meio de protocolos
 # Principio de funcionamento:
 #   O Usuário deve inserir 4 caracteres que devem ser codificados em 32bits pela ASCII
@@ -11,8 +12,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Tratamento de dados:
-# Tratar como string, pra facilitar os indices do 
-#---------------------------------------------------------------------
+# Tratar como string, pra facilitar os indices
+
+#----------------------------- 2BQ1 -----------------------------------
 def cod_2BQ1 (sinal):
     mapping =  {
         '00': 1,
@@ -25,7 +27,7 @@ def cod_2BQ1 (sinal):
     for i in range(0, len(sinal), 2):       #Ir pegando duplas de bits
         dupla = mapping[sinal[i:i+2]]       #converte pra inteiro, de 2 em 2 da string sinal
         if nivel_anterior > 0:              #condição pra invesões
-            sinais_tensao.append(dupla)               #adiciona o inteiro a string de codificação
+            sinais_tensao.append(dupla)     #adiciona o inteiro a string de codificação
             nivel_anterior = dupla          #Atualiza o nivel para verificação no proximo loop
         else :
             sinais_tensao.append(-dupla)
@@ -49,7 +51,8 @@ def plot_2BQ1(sinal):
         plt.axvline(x=x, color='gray', linestyle='--', linewidth=0.5)  # Linha vertical
 
     plt.xlim(0, len(sinal)+1)  
-#-------------------------------------------------------------------------------
+
+#----------------------------- 8B6T -----------------------------------
 
 def analise_peso(tensoes):                  #Definição da função para inversão
     #Utilização: Se o peso do sinal 6T for positivo e o seu anterior também, o atual é invertido para não gerar DC
@@ -63,20 +66,20 @@ def analise_peso(tensoes):                  #Definição da função para invers
     else:
         return -1
        
-valores = np.load('valores_8B6T.npy')
+valores = np.load('valores_8B6T.npy')       #Carregamento de valores de uma tabela de conversão
 
 def indices_hexa():
     mapeamento = [['00', [0, 0, 0, 0, 0, 0],0] for _ in range(256)]  
     # cria uma matriz do tipo [HEXADECIMAL, Sequencia de Valores de Tensão, peso]
 
-    #preencher a 1 coluna do mapeamento como sendo os valores em hexadecimal
+    # Preencher a 1 coluna do mapeamento como sendo os valores em hexadecimal
     for i in range(0, 255):                     #Nao vai até 255 pois o arquivo importado n tem o tamanho certo
         aux = format(i, '02X')
         mapeamento[i][0] = aux                  #Adiciona o hexadeximal 
         mapeamento[i][1] = valores[i].tolist()  #Adiciona os niveis de tensão correspondentes
         mapeamento[i][2] = analise_peso(mapeamento[i][1]) #Se retirar .tolist apresenta insconsistencia de formato
     
-    #Correções de erros na lista importada: (adicionar a medida que descobrir)
+    #Correções de erros na lista importada:
     mapeamento[255][0] = 'FF'
     mapeamento[255][1] = [0,0,1,-1,0,1]
     mapeamento[255][2] = 1
@@ -141,7 +144,7 @@ def plot_8b6T(sinal):
     # Garantir que o eixo X vai até o final
     plt.xlim(0, len(sinal))  # Para alinhar à borda direita
 
-#-------------------------------------------------------------------------------------
+#----------------------------- 4DPAM5 -----------------------------------
 
 def cod_4DPAM5(sinal):
     #4D: Dados são enviados por meio de 4 canais, teremos 4 plots
@@ -215,7 +218,7 @@ def plot_4DPAM5(sinal, fio1,fio2,fio3,fio4):
 
     plt.tight_layout()  # Ajusta o layout
       
-#----------------------------------------------------------------------
+#----------------------------- MLT3 -----------------------------------
 
 def transicao_nivel(atual, prox, lastlevel):
     # ---------- logica p o zero ----------------
@@ -278,18 +281,19 @@ def conv_ASCII(sinal):
         bin = format(ord(i), '08b')  
         print(f"Char: {i} --> {ord(i)} --> {bin}")  
         dados.append(bin)
-    dados = ''.join(dados) #usar como int()?
+    dados = ''.join(dados)
     return dados
 
 signal = conv_ASCII(leitura)
 print(signal, end = "\n\n")
 
 #ex_prof = '000100010101001101010000'
+#ex_prof1 = '01011011'
+#Plotagem de graficos:
 plot_2BQ1(cod_2BQ1(signal))
 plot_8b6T(cod_8B6T(signal))
 result, f1,f2,f3,f4 = cod_4DPAM5(signal)
 plot_4DPAM5(result,f1,f2,f3,f4)
-#ex_prof2 = '01011011'
 plot_MLT3(cod_MLT3(signal))
 plt.show()
 
